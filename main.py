@@ -3,13 +3,31 @@ import matplotlib.pyplot as plt
 
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    columns = ['cap-shape',
+                'cap-surface', 
+                'cap-color',
+                'bruises',
+                'odor',
+                'gill',
+                'gill-spacing',
+                'gill-size',
+                'gill-color',
+                'stalk-shape',
+                'stalk-root',
+                'stalk-surface-above-ring',
+                'stalk-surface-below-ring',
+                'stalk-color-above-ring',
+                'stalk-color-below-ring',
+                'veil-type',
+                'veil-color',
+                'ring-number',
+                'ring-type',
+                'spore-print-color',
+                'population',
+                'habitat']
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    pd.read_csv('data/agaricus-lepiota.data')
+
