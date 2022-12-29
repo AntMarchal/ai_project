@@ -13,15 +13,16 @@ torch.set_grad_enabled(False)
 
 
 class NeuralNet():
-    def __init__(self, n_epochs=25, lr=1e-1):
+    def __init__(self, n_features, n_label, n_epochs=25, lr=1e-1):
         self.n_epochs = n_epochs
         self.model = Sequential(
-                                Linear(2, 25),
+                                Linear(n_features, 25),
                                 ReLU(),
                                 Linear(25, 25),
                                 ReLU(),
-                                Linear(25, 1),
-                                Sigmoid()
+                                Linear(25, 25),
+                                ReLU(),
+                                Linear(25, n_label),
                                )
 
         self.optimizer = SGD(self.model.params(), lr=lr)
