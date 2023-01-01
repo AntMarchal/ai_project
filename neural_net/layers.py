@@ -13,20 +13,20 @@ class Linear(Module):
         self.w = empty(n_out, n_in).uniform_(-sqrt(6.0 / float(n_in + n_out)), sqrt(6.0 / float(n_in + n_out)))
         self.gradwrt_w = empty(n_out, n_in)
 
-        self.b = empty(n_out,1).uniform_(-sqrt(6.0 / float(n_in + n_out)), sqrt(6.0 / float(n_in + n_out)))
-        self.gradwrt_b = empty(n_out,1)
+        self.b = empty(1, n_out).uniform_(-sqrt(6.0 / float(n_in + n_out)), sqrt(6.0 / float(n_in + n_out)))
+        self.gradwrt_b = empty(1, n_out)
 
 
 
     def forward(self, input):
         self.input = input
-        return self.w.mm(input) + self.b
+        return self.input.mm(self.w.t()) + self.b
 
     def backward(self, gradwrtoutput):
 
-        gradwrtinput = self.w.t().mm(gradwrtoutput)
-        self.gradwrt_w.add_(gradwrtoutput.view(-1, 1).mm(self.input.view(1, -1)))
-        self.gradwrt_b.add_(gradwrtoutput)
+        gradwrtinput = gradwrtoutput.mm(self.w)
+        self.gradwrt_w.add_(gradwrtoutput.t().mm(self.input) / self.input.size(0))
+        self.gradwrt_b.add_(gradwrtoutput.mean(axis=0))
 
         return gradwrtinput
 

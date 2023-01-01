@@ -16,13 +16,14 @@ class MSELoss(Module):
 class CrossEntropyLoss(Module):
     def forward(self, output, target):
         # softmax
-        self.probs = output.exp().div(output.exp().sum()) #todo: check dim
-        return -self.probs[target.view(self.probs.shape).bool()].log()
+        self.probs = output.exp().div(output.exp().sum(axis=1, keepdim=True))
+        loss = (-self.probs[target.bool()].log()).mean()
+        return loss
 
     def backward(self, output, target):
         # The grad is given by p-1 for the class of the target and p for the rest see derivation ??? in report
         grad = self.probs.detach().clone()
-        grad[target.view(grad.shape).bool()] -= 1
+        grad[target.bool()] -= 1
         return grad
 
     def params(self):

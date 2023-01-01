@@ -11,7 +11,6 @@ class Sequential(Module):
         x = input
         for layer in self.layers:
             x = layer.forward(x)
-
         return x
 
     def backward(self, gradwrtoutput):

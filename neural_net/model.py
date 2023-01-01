@@ -2,6 +2,7 @@ from sklearn.preprocessing import OneHotEncoder
 from tqdm import tqdm
 import torch
 import numpy as np
+import math
 
 from layers import Linear
 from sequential import Sequential
@@ -14,7 +15,7 @@ torch.set_grad_enabled(False)
 
 
 class NeuralNet():
-    def __init__(self, n_features, n_label, n_epochs=25, lr=1e-1):
+    def __init__(self, n_features, n_label, n_epochs=25, lr=1e-1, batch_size=100):
         self.n_epochs = n_epochs
         self.model = Sequential(
                                 Linear(n_features, 25),
@@ -28,6 +29,7 @@ class NeuralNet():
 
         self.optimizer = SGD(self.model.params(), lr=lr)
         self.criterion = CrossEntropyLoss()
+        self.batch_size = batch_size
 
 
     def fit(self, X_train, y_train):
@@ -43,33 +45,35 @@ class NeuralNet():
         self.mu, self.std = self.X_train.mean(0), self.X_train.std(0)
         self.X_train.sub_(self.mu).div_(self.std)
 
-        for e in tqdm(range(self.n_epochs)):
-            epoch_loss = 0
-            for i in range(self.X_train.size(0)):
-                output = self.model.forward(self.X_train.narrow(0, i, 1).view(-1, 1))
-                epoch_loss += self.criterion.forward(output, self.y_train.narrow(0, i, 1)).item()
+        for e in range(self.n_epochs):
+            epoch_losses = []
+            for b in range(0, self.X_train.size(0), self.batch_size):
+                X_train_batch = self.X_train[b:b+self.batch_size] if (b+self.batch_size <= self.X_train.size(0)) else self.X_train[b:]
+                y_train_batch = self.y_train[b:b+self.batch_size] if (b+self.batch_size <= self.y_train.size(0)) else self.y_train[b:]
+                output = self.model.forward(X_train_batch)
+                epoch_loss = self.criterion.forward(output, y_train_batch).item()
+                if math.isnan(epoch_loss):
+                    epoch_loss
+                epoch_losses.append(epoch_loss)
                 self.model.zero_grad()
-                gradwrtoutput = self.criterion.backward(output, self.y_train.narrow(0, i, 1))
+                gradwrtoutput = self.criterion.backward(output, y_train_batch)
                 self.model.backward(gradwrtoutput)
                 self.optimizer.step()
 
 
             print(
-                f'Epoch #{e}, epoch_loss={epoch_loss}')
+                f'Epoch #{e}, avg_epoch_loss={sum(epoch_losses) / len(epoch_losses)}')
 
     def predict(self, X_test):
         X_test = torch.tensor(X_test.values, dtype=torch.float32)
         X_test.sub_(self.mu).div_(self.std)
 
-        class_preds = []
-        for i in range(X_test.size(0)):
-            output = self.model.forward(X_test.narrow(0, i, 1).view(-1, 1))
-            probs = output.exp().div(output.exp().sum())
-            one_hot_class_pred = np.zeros_like(probs.view(1,-1))
-            one_hot_class_pred[:, probs.argmax().item()] = 1
-            class_preds.append(self.encoder.inverse_transform(one_hot_class_pred).item())
+        output = self.model.forward(X_test)
+        probs = output.exp().div(output.exp().sum(axis=1, keepdim=True))
+        one_hot_class_pred = np.zeros_like(probs)
+        one_hot_class_pred[range(probs.shape[0]), probs.argmax(axis=1, keepdim=False)] = 1
+        return self.encoder.inverse_transform(one_hot_class_pred)
 
-        return class_preds
 
 
 
