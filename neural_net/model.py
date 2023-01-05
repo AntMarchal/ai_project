@@ -15,19 +15,19 @@ torch.set_grad_enabled(False)
 
 
 class NeuralNet():
-    def __init__(self, n_features, n_label, n_epochs=25, lr=1e-1, batch_size=100):
+    def __init__(self, n_features, n_label, n_epochs=25, lr=1e-1, momentum=0.5, batch_size=100, n_hidden=25):
         self.n_epochs = n_epochs
         self.model = Sequential(
-                                Linear(n_features, 25),
+                                Linear(n_features, n_hidden),
                                 ReLU(),
-                                Linear(25, 25),
+                                Linear(n_hidden, n_hidden),
                                 ReLU(),
-                                Linear(25, 25),
+                                Linear(n_hidden, n_hidden),
                                 ReLU(),
-                                Linear(25, n_label),
+                                Linear(n_hidden, n_label),
                                )
 
-        self.optimizer = SGD(self.model.params(), lr=lr)
+        self.optimizer = SGD(self.model.params(), lr=lr, momentum=momentum)
         self.criterion = CrossEntropyLoss()
         self.batch_size = batch_size
 
@@ -47,6 +47,10 @@ class NeuralNet():
 
         for e in range(self.n_epochs):
             epoch_losses = []
+            # shuffle the train set between each epoch
+            rnd_perm = torch.randperm(self.X_train.size(0))
+            self.X_train = self.X_train[rnd_perm]
+            self.y_train = self.y_train[rnd_perm]
             for b in range(0, self.X_train.size(0), self.batch_size):
                 X_train_batch = self.X_train[b:b+self.batch_size] if (b+self.batch_size <= self.X_train.size(0)) else self.X_train[b:]
                 y_train_batch = self.y_train[b:b+self.batch_size] if (b+self.batch_size <= self.y_train.size(0)) else self.y_train[b:]
@@ -61,8 +65,8 @@ class NeuralNet():
                 self.optimizer.step()
 
 
-            print(
-                f'Epoch #{e}, avg_epoch_loss={sum(epoch_losses) / len(epoch_losses)}')
+            # print(
+            #     f'Epoch #{e}, avg_epoch_loss={sum(epoch_losses) / len(epoch_losses)}')
 
     def predict(self, X_test):
         X_test = torch.tensor(X_test.values, dtype=torch.float32)

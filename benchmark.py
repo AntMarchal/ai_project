@@ -20,7 +20,7 @@ if __name__ == "__main__":
     )
 
     knn = KNeighborsClassifier(
-        n_neighbors=3, weights="distance", metric=hamming
+        n_neighbors=3, weights="distance", #metric=hamming
     )
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
