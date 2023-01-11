@@ -41,7 +41,7 @@ if __name__ == "__main__":
     param = {"n_neighbors": optuna.distributions.IntUniformDistribution(1, 30)}
     sss = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=seed)
     optuna_search = optuna.integration.OptunaSearchCV(knn, param, cv=sss, n_trials=100,
-                                                      random_state=seed, scoring='f1_macro')
+                                                      random_state=seed, scoring='f1_macro', n_jobs=-1)
     optuna_search.fit(X_train, y_train)
     dir = 'benchmark/hyperparam_tuning/mushroom'
     study = optuna_search.study_
