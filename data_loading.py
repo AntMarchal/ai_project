@@ -32,7 +32,7 @@ def train_test_mushroom_data(
         "habitat",
     ]
     data = pd.read_csv(
-        "data/agaricus-lepiota.data", names=columns, index_col=None
+        "/Users/antoinemarchal/PycharmProjects/ai_project/data/agaricus-lepiota.data", names=columns, index_col=None
     ).reset_index()
     y = (data["index"] == "e") * 1
     X = data.drop(columns="index")
@@ -54,7 +54,7 @@ def train_test_mushroom_data(
 def train_test_wine_data(
     test_size=0.25, shuffle=True, random_state=None
 ):
-    data = pd.read_csv("data/winequality-white.csv", sep=";")
+    data = pd.read_csv("/Users/antoinemarchal/PycharmProjects/ai_project/data/winequality-white.csv", sep=";")
     y = data["quality"]
     X = data.drop(columns="quality")
     X_train, X_test, y_train, y_test = train_test_split(

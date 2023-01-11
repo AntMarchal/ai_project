@@ -29,7 +29,7 @@ class Tuner():
             neural_net = self.Model(self.n_features, self.n_label, **params)
             neural_net.fit(X_train, y_train)
             y_pred = neural_net.predict(X_test)
-            scores.append(classification_report(y_test, y_pred, output_dict=True)['weighted avg'][self.metric])
+            scores.append(classification_report(y_test, y_pred, output_dict=True)['macro avg'][self.metric])
 
         score_ = sum(scores) / len(scores) #TODO: maybe take into consideration the std
         return score_
@@ -60,18 +60,18 @@ class Tuner():
             if compt * os.cpu_count() > 100:
                 print('Stop the parameter tuning after {} trials'.format(i * os.cpu_count()))
                 break
-        joblib.dump(self.study, 'neural_net/hyperparam_tuning/study.pkl')
+        joblib.dump(self.study, 'neural_net/hyperparam_tuning/mushroom/study.pkl')
         return self.study.best_params
 
     def study_visualization(self):
         if self.study is None:
             raise Exception('The model must be trained first!')
         plotly.offline.plot(optuna.visualization.plot_optimization_history(self.study),
-                            filename='neural_net/hyperparam_tuning/plot_optimization_history.html')
+                            filename='neural_net/hyperparam_tuning/mushroom/plot_optimization_history.html')
         plotly.offline.plot(optuna.visualization.plot_slice(self.study),
-                            filename='neural_net/hyperparam_tuning/plot_slice.html')
+                            filename='neural_net/hyperparam_tuning/mushroom/plot_slice.html')
         plotly.offline.plot(optuna.visualization.plot_param_importances(self.study),
-                            filename='neural_net/hyperparam_tuning/plot_param_importances.html')
+                            filename='neural_net/hyperparam_tuning/mushroom/plot_param_importances.html')
 
 
 
@@ -79,7 +79,7 @@ class Tuner():
 
 if __name__ == '__main__':
     seed = 42
-    X_train, X_test, y_train, y_test = train_test_wine_data(
+    X_train, X_test, y_train, y_test = train_test_mushroom_data(
         test_size=0.25, shuffle=True, random_state=seed
     )
     sss = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=seed)

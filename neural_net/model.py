@@ -41,9 +41,10 @@ class NeuralNet():
         self.y_train = self.encoder.transform(y_train.values.reshape(-1,1))
         self.y_train = torch.tensor(self.y_train)
 
-        # Normalization (X_train, X_test will be normalised by the same mu and std)
-        self.mu, self.std = self.X_train.mean(0), self.X_train.std(0)
-        self.X_train.sub_(self.mu).div_(self.std)
+        # Normalization if not one-hot encoded data (X_train, X_test will be normalised by the same mu and std)
+        if (self.X_train.unique() != torch.tensor([0., 1.])).all():
+            self.mu, self.std = self.X_train.mean(0), self.X_train.std(0)
+            self.X_train.sub_(self.mu).div_(self.std)
 
         for e in range(self.n_epochs):
             epoch_losses = []
@@ -70,7 +71,9 @@ class NeuralNet():
 
     def predict(self, X_test):
         X_test = torch.tensor(X_test.values, dtype=torch.float32)
-        X_test.sub_(self.mu).div_(self.std)
+        # Normalization
+        if (self.X_train.unique() != torch.tensor([0., 1.])).all():
+            X_test.sub_(self.mu).div_(self.std)
 
         output = self.model.forward(X_test)
         probs = output.exp().div(output.exp().sum(axis=1, keepdim=True))

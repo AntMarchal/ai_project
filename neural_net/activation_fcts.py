@@ -1,5 +1,6 @@
 from module import Module
 
+
 class ReLU(Module):
     def forward(self, input):
         self.input = input
@@ -12,6 +13,7 @@ class ReLU(Module):
     def params(self):
         return []
 
+
 class Tanh(Module):
     def forward(self, input):
         self.input = input
@@ -23,6 +25,7 @@ class Tanh(Module):
 
     def params(self):
         return []
+
 
 class Sigmoid(Module):
     def forward(self, input):
