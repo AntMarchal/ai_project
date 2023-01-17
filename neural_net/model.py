@@ -42,7 +42,7 @@ class NeuralNet():
         self.y_train = torch.tensor(self.y_train)
 
         # Normalization if not one-hot encoded data (X_train, X_test will be normalised by the same mu and std)
-        if (self.X_train.unique() != torch.tensor([0., 1.])).all():
+        if self.X_train.unique().size(0) > 2 :
             self.mu, self.std = self.X_train.mean(0), self.X_train.std(0)
             self.X_train.sub_(self.mu).div_(self.std)
 
@@ -72,7 +72,7 @@ class NeuralNet():
     def predict(self, X_test):
         X_test = torch.tensor(X_test.values, dtype=torch.float32)
         # Normalization
-        if (self.X_train.unique() != torch.tensor([0., 1.])).all():
+        if self.X_train.unique().size(0) > 2 :
             X_test.sub_(self.mu).div_(self.std)
 
         output = self.model.forward(X_test)

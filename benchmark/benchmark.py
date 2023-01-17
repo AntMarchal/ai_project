@@ -25,25 +25,24 @@ def study_visualization(study, dir):
 
 if __name__ == "__main__":
 
-    ################################### mushrooms ###################################
 
     seed = 42
+    X_train, X_test, y_train, y_test = train_test_wine_data(
+        test_size=0.25, shuffle=True, random_state=seed
+    )
     # X_train, X_test, y_train, y_test = train_test_mushroom_data(
     #     test_size=0.25, shuffle=True, random_state=seed
     # )
-    X_train, X_test, y_train, y_test = train_test_mushroom_data(
-        test_size=0.25, shuffle=True, random_state=seed
-    )
 
     knn = KNeighborsClassifier(
-        n_neighbors=3, weights="distance", metric=hamming
+        n_neighbors=3, weights="distance", #metric=hamming
     )
-    param = {"n_neighbors": optuna.distributions.IntUniformDistribution(1, 30)}
+    param = {"n_neighbors": optuna.distributions.IntUniformDistribution(1, 20)}
     sss = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=seed)
-    optuna_search = optuna.integration.OptunaSearchCV(knn, param, cv=sss, n_trials=100,
+    optuna_search = optuna.integration.OptunaSearchCV(knn, param, cv=sss, n_trials=50,
                                                       random_state=seed, scoring='f1_macro', n_jobs=-1)
     optuna_search.fit(X_train, y_train)
-    dir = 'benchmark/hyperparam_tuning/mushroom'
+    dir = 'hyperparam_tuning/wine'
     study = optuna_search.study_
     joblib.dump(optuna_search.study_, f'{dir}/study.pkl')
     study_visualization(study, dir)
